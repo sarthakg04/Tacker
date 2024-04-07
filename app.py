@@ -35,7 +35,7 @@ def analyze_policy():
 
 def get_policy_analysis(policy_text):
     # Initialize Anthropic API client
-    client = anthropic.Anthropic(api_key="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")
+    client = anthropic.Anthropic(api_key="api-key")
     prompt = f"""
 Given the text of a company's data policy provided below, please evaluate it according to specific criteria for each category: Data Collection, Data Retention, IP and Data Ownership, Data Privacy & Sharing, and Liability and Indemnification. After evaluating, populate the JSON structure with your analysis, marking each category as "true" for "Good" or "false" for "Bad" based on the following criteria:
 
