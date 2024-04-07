@@ -1,5 +1,8 @@
 from flask import Flask, request, render_template_string
+import requests
+from bs4 import BeautifulSoup
 import anthropic
+
 
 app = Flask(__name__)
 
@@ -14,9 +17,10 @@ HTML_TEMPLATE = """
 <body>
     <h2>Policy Text Analysis</h2>
     <form method="post">
-        <textarea name="policy_text" rows="20" cols="100"></textarea><br>
+        URL: <input type="text" name="url" /><br>
         <input type="submit">
     </form>
+
     {% if analysis %}
         <h3>Analysis Result:</h3>
         <pre>{{ analysis }}</pre>
@@ -28,14 +32,24 @@ HTML_TEMPLATE = """
 @app.route('/', methods=['GET', 'POST'])
 def analyze_policy():
     if request.method == 'POST':
-        policy_text = request.form['policy_text']
+        url = request.form['url']
+        policy_text = fetch_policy_text(url)
         analysis = get_policy_analysis(policy_text)
         return render_template_string(HTML_TEMPLATE, analysis=analysis)
     return render_template_string(HTML_TEMPLATE, analysis=None)
 
+def fetch_policy_text(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Extract all text from the webpage
+    text = ' '.join(soup.stripped_strings)
+    return text
+
+
 def get_policy_analysis(policy_text):
     # Initialize Anthropic API client
-    client = anthropic.Anthropic(api_key="api-key")
+    client = anthropic.Anthropic(api_key="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")
     prompt = f"""
 Given the text of a company's data policy provided below, please evaluate it according to specific criteria for each category: Data Collection, Data Retention, IP and Data Ownership, Data Privacy & Sharing, and Liability and Indemnification. After evaluating, populate the JSON structure with your analysis, marking each category as "true" for "Good" or "false" for "Bad" based on the following criteria:
 
